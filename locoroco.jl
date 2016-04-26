@@ -1,4 +1,5 @@
-# Aqui viene una explicación de lo que se hace en el módulo, los autores y la fecha
+# Young 1.0 David Amaro-Alcalá
+# 25 IV 2016
 
 # La siguiente instrucción sirve para *precompilar* el módulo
 __precompile__(true)
@@ -81,25 +82,47 @@ module YO
         formato(reshape(juntador, (length(lista), div(length(juntador), length(lista)))))
     end
 
+    doc"""
+    `signo(-1)` o `signo(1)`.
+    Si tiene -1 lo cambia a 1 y vice versa.
+    """
     function determinarSigno(signo)
         signo,-signo
     end
 
+
+    doc"""
+    Recibe una `avellana` y `arriba` `abajo`.
+    Utiliza a `antiSemita` y a `generar`.
+    """
     function recibeAvellanaAnti(avellana,arriba,abajo)
         signos = determinarSigno(avellana.sign)
         listas = antiSemita(arriba,abajo,avellana.coef)
         generador(signos,listas)
     end
 
+    doc"""
+    Utiliza a `razzamatazz` para generar el estado
+    **simétrico**.
+    """
     function recibeAvellanaSim(avellana,indices)
         listas = razzamatazz(avellana.coef,indices)
         generadorSim(listas)
     end
 
+    doc"""
+    Genera los dos estados resultado de **antisimetrizar**.
+    Simplemente genera las dos *avellanas*; con el
+    signo y la lista correcta.
+    """
     function generador(signos,listas)
         [avellana(listas[1],signos[1]),avellana(listas[2],signos[2])]
     end
 
+    doc"""
+    Toma todos los *vectores* resultado de **simetrizar**
+    y forma las *avellanas* correspondiente.
+    """
     function generadorSim(listas)
         estados = avellana[]
         for i in 1:length(listas)
@@ -108,6 +131,9 @@ module YO
         estados
     end
 
+    doc"""
+    Aplana una lista. De rosetta code.
+    """
     function flat(A)
        result = Any[]
        grep(a) = for x in a 
@@ -117,10 +143,19 @@ module YO
        result
      end
 
+    doc"""
+    Versión del producto de Kronecker pero
+    usando **avellanas**.
+    """
     function superkron(avellana)
         avellana.sign*kron(avellana.coef...)
     end
 
+    doc"""
+    El primer estado resultado de las permutaciones
+    tiene la consideración de que puede dar varios
+    tablones de Young. Aquí se calculan todos.
+    """
     function primero(lista)
         quita = []
         push!(quita,tablón(lista,Int64[]))
@@ -130,16 +165,27 @@ module YO
         quita
     end
 
+    doc"""
+    `validez` utiliza la observación de que todos los
+    diagramas de Young que podemos obtener del resultado
+    de las **permutaciones** siempre tienen que iniciar
+    con un **uno** y un **dos** o **tres**.
+    """
     function validez(lista)
         if (lista[1] == 1 && lista[2] == 2) || (lista[1] == 1 && lista[2] == 3)
             return true
         end
         return false
     end
+
+    doc"""
+    Utilizamos a `iterador2` *junto con* `validez`
+    para obtener, de las permutaciones, los prototabloides
+    de Young. sólo recorre los necesarios.
+    """
     function iterador2(coleccion)
         válidos = []
         estadoActual = start(coleccion)
-        #stadoActual = next(coleccion,estadoActual)[2]
         while validez(estadoActual[1:2])
             push!(válidos, estadoActual)
             estadoActual = next(coleccion,estadoActual)[2]
@@ -147,6 +193,10 @@ module YO
         válidos
     end
 
+    doc"""
+    `orden2` revisa y mutila las permutaciones para
+    que puedan formar una tabla de Young.
+    """
     function orden2(lista)
         longMin = 1
         if length(lista) == longMin
@@ -156,12 +206,24 @@ module YO
         b = lista[2]
         
         for i in 2:length(lista)
+            # Este primer criterio se refiere
+            # al hecho de que seguimos en orden
+            # y además todavía no estamos en el último
             if a<b && i < length(lista)
                 a = lista[i]
                 b = lista[i+1]
                 continue
+            # Si todos están en orden significa
+            # que estamos ante la primera permutación
+            # por lo que llamamos a `primero` para
+            # que nos genere a todos los estados.
             elseif a<b && i+1 > length(lista)
                 return primero(lista)
+            # Hay desorden y ya tienen el tamño necesario
+            # que es que la parte de arriba ya tiene
+            # más de la mitad de la tabla por lo que
+            # es un buen candidato para generar
+            # una tabla de Young.
             elseif a>b && i-1 >= length(lista)/2
                 return tablón(lista[1:i-1],lista[i:length(lista)])
             else
@@ -170,6 +232,14 @@ module YO
         end
         (null)
     end
+
+    doc"""
+    Revisa que los elementos de una lista
+    estén completamente ordenados: 1,2,3,4,5
+    etc. Lo usamos con `stephen` para que
+    los protooYoung sean evaluados para ser
+    un buen tablón de Young.
+    """
     function orden(lista)
         if length(lista) == 0
             return true
@@ -193,6 +263,10 @@ module YO
         return true
     end
 
+    doc"""
+    `loca` revisa que los de arriba sean mayores
+    que los de abajo.
+    """
     function loca(lista1,lista2)
         mínimo = min(length(lista1),length(lista2))
         for i in 1:mínimo
@@ -203,18 +277,33 @@ module YO
         true
     end
 
+    doc"""
+    Verifica que todas las condiciones se cumplan para
+    ser un tabloide de Young. Lo que pasa es que
+    puuede que después del primer desorden existe todavía
+    desorden en la fila de abajo.
+    """
     function stephen(tabla::tablón)
         if orden(tabla.a) && orden(tabla.b) && loca(tabla.a,tabla.b)
             return tabla
         end
         ()
     end
+    doc"""
+    Utiliza las permutaciones y los test para ver si una 
+    prototabla es una buena tabla.
+    """
     function generarTablas(numero)
         a = map(orden2,iterador2(permutations(1:numero)))
         a = flat(a)
         a = map(stephen,a)
     end
 
+    doc"""
+    Obtiene en un solo vector los valores que se
+    pasaran al antisimetrizador para antismetrizar
+    el estado.
+    """
     function alborotador(tabla::tablón)
         todos = []
         for i in 1:length(tabla.b)
@@ -223,18 +312,9 @@ module YO
         todos
     end
 
-    #function anti(nuez::avellana,tabla::tablón)
-        #if length(tabla.b) == 0
-            #return nuez
-        #end
-        #valores = alborotador(tabla)
-        #demas = []
-        #for i in 1:2:length(valores-1)
-            #push!(demas,recibeAvellanaAnti(nuez,valores[i],valores[i+1]))
-        #end
-        #demas
-    #end
-
+    doc"""
+    Aplica todas las simetrías al estado.
+    """
     function trail(nuez::avellana, tabla::tablón)
         sal = recibeAvellanaSim(nuez,tabla.a)
         if length(tabla.b) == 0
@@ -244,22 +324,32 @@ module YO
         sal
     end
 
+    doc"""
+    Dada una avellana y un tablón, le aplica este último a
+    la avellana.
+    """
     function aplicarTabla(nuez::avellana,tabla::tablón)
         a = trail(nuez,tabla)
         a = flat(a)
-	a = anti(a, tabla)
+        a = anti(a, tabla)
         a = flat(a)
         a = map(superkron,a)
         sum(a)
     end
-	function anti(lista, tabla::tablón)
-		estados =[]
-		valores = alborotador(tabla)
-		a = lista
-		for i in 1:2:length(valores)
-			a = map(x->recibeAvellanaAnti(x,valores[i],valores[i+1]), a)
-			a=flat(a)
-		end
-		a
-	end
+    doc"""
+    Dado que para antisimetrizar son varias veces
+    se utiliza una lista y a cada uno de esas
+    listas se aplica el antisimetrizador a este resultado
+    se le aplica el antisimetrizador y así.
+    """
+    function anti(lista, tabla::tablón)
+        estados =[]
+        valores = alborotador(tabla)
+        a = lista
+        for i in 1:2:length(valores)
+            a = map(x->recibeAvellanaAnti(x,valores[i],valores[i+1]), a)
+            a=flat(a)
+        end
+        a
+    end
 end
