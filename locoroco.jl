@@ -16,13 +16,13 @@ module YO
     y = [0,1]
 
     type avellana
-        coef :: Array{Any,1}
+        coef :: Array{Array{Int,1},1}
         sign :: Int64
     end
 
     type tablón
-        a :: Array{Any,1}
-        b :: Array{Any,1}
+        a :: Array{Int,1}
+        b :: Array{Int,1}
     end
 
     doc"""
@@ -30,8 +30,8 @@ module YO
     es el **vector** *permutador*.
     """
     function crater(lista,permutacion,indices)
-        for i in 1:length(indices)
-            lista[indices[i]] = permutacion[i]
+        for i in eachindex(indices)
+	    lista[indices[i]] = permutacion[i]
         end
         lista
     end
@@ -43,9 +43,11 @@ module YO
     a los elementos que corresponden a los índices que les dimos.
     """
     function razzamatazz(lista,indices)
-        estados = []
+        estados = Array{Int,1}[]
         paraSerPermutados = []
+        # paraSerPermutados = Array{}(length(indices))
         for i in 1:length(indices)
+	    #typeof(lista[indices[i]])
             push!(paraSerPermutados, lista[indices[i]])
         end
         permutaciones = collect(permutations(paraSerPermutados))
@@ -64,6 +66,7 @@ module YO
         for i in 1:b
             push!(listitas, array[:,i])
         end
+	println(typeof(listitas))
         listitas
     end
     doc"""
@@ -109,7 +112,7 @@ module YO
     end
 
     function flat(A)
-       result = Any[]
+       result = []
        grep(a) = for x in a 
                    isa(x,Array) ? grep(x) : push!(result,x)
                  end
@@ -244,13 +247,18 @@ module YO
         sal
     end
 
-    function aplicarTabla(nuez::avellana,tabla::tablón)
+    function aplicarTabla(nuez::avellana,tabla)
+#	if typeof(tabla) != tablón
+#	  return nothing
+#	end
+	if typeof(tabla) == tablón
         a = trail(nuez,tabla)
         a = flat(a)
 	a = anti(a, tabla)
         a = flat(a)
         a = map(superkron,a)
-        sum(a)
+        return sum(a)
+	end
     end
 	function anti(lista, tabla::tablón)
 		estados =[]
