@@ -10,7 +10,7 @@ module YO
     export generador, generadorSim, flat, superkron
     export tablón, primero, validez, iterador2, orden2
     export orden, loca, stephen, generarTablas
-    export alborotador, anti, trail, aplicarTabla
+    export alborotador, anti, trail, aplicarTabla, flatAvellana
 
     x = [1,0]
     y = [0,1]
@@ -98,6 +98,7 @@ module YO
     end
 
     function generador(signos,listas)
+        #println("generador: ", typeof([avellana(listas[1],signos[1]),avellana(listas[2],signos[2])]))
         [avellana(listas[1],signos[1]),avellana(listas[2],signos[2])]
     end
 
@@ -109,7 +110,17 @@ module YO
         estados
     end
 
+    function flatAvellana(A)
+       #println(typeof(A))
+       result = avellana[]
+       grep(a) = for x in a 
+                   isa(x,Array) ? grep(x) : push!(result,x)
+                 end
+       grep(A)
+       result
+     end
     function flat(A)
+       #println("flatsolo. ",typeof(A))
        result = []
        grep(a) = for x in a 
                    isa(x,Array) ? grep(x) : push!(result,x)
@@ -165,10 +176,10 @@ module YO
             elseif a>b && i-1 >= length(lista)/2
                 return tablón(lista[1:i-1],lista[i:length(lista)])
             else
-                (null)
+                tablón(Int64[],Int64[])
             end
         end
-        (null)
+	tablón(Int64[], Int64[])
     end
     function orden(lista)
         if length(lista) == 0
@@ -210,9 +221,18 @@ module YO
         ()
     end
     function generarTablas(numero)
-        a = map(orden2,iterador2(permutations(1:numero)))
-        a = flat(a)
-        a = map(stephen,a)
+    	contenedor = tablón[]
+	b = iterador2(permutations(1:numero))
+	for i in b
+		#println("tipo ", typeof(orden2(i)))
+		if typeof(orden2(i)) == Array{YO.tablón,1}
+			push!(contenedor, orden2(i)...)
+			continue
+		end
+		push!(contenedor, orden2(i))
+	end
+	#println("tipo cont ", typeof(contenedor))
+	contenedor
     end
 
     function alborotador(tabla::tablón)
@@ -249,10 +269,12 @@ module YO
 #  return nothing
 #end
         if typeof(tabla) == tablón
-            #println("tipo del arg. ", typeof(trail(nuez,tabla)))
-            a = flat(trail(nuez,tabla))
+            a = flatAvellana(trail(nuez,tabla))
+	    #println("PREanti: ", typeof(a))
             a = anti(a, tabla)
-            a = flat(a)
+	    #println("anti: ", typeof(a))
+            a = flatAvellana(a)
+	    #println("POSTanti: ", typeof(a))
             a = map(superkron,a)
             return sum(a)
         end
@@ -261,8 +283,10 @@ module YO
         valores = alborotador(tabla)
         a = lista
         for i in 1:2:length(valores)
-            a = flat(map(x->recibeAvellanaAnti(x,valores[i],valores[i+1]), a))
+	    #println("por aquí pasó:")
+            a = flatAvellana(map(x->recibeAvellanaAnti(x,valores[i],valores[i+1]), a))
         end
+	    #println("dentroDEanti: ", typeof(a))
         a
     end
 end
