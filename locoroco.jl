@@ -44,10 +44,9 @@ module YO
     """
     function razzamatazz(lista,indices)
         estados = Array{Int,1}[]
-        paraSerPermutados = []
+        paraSerPermutados = Array{Int64,1}[]
         # paraSerPermutados = Array{}(length(indices))
         for i in 1:length(indices)
-	    #typeof(lista[indices[i]])
             push!(paraSerPermutados, lista[indices[i]])
         end
         permutaciones = collect(permutations(paraSerPermutados))
@@ -62,11 +61,10 @@ module YO
     """
     function formato(array)
         a,b = size(array)
-        listitas = []
+        listitas = Array{Array{Int64,1},1}[]
         for i in 1:b
             push!(listitas, array[:,i])
         end
-	println(typeof(listitas))
         listitas
     end
     doc"""
@@ -125,7 +123,7 @@ module YO
     end
 
     function primero(lista)
-        quita = []
+        quita = tablón[]
         push!(quita,tablón(lista,Int64[]))
         for i in convert(Int,ceil(length(lista)/2))+1:length(lista)
             push!(quita,tablón(lista[1:i-1],lista[i:length(lista)]))
@@ -140,9 +138,8 @@ module YO
         return false
     end
     function iterador2(coleccion)
-        válidos = []
+        válidos = Array{Int64,1}[]
         estadoActual = start(coleccion)
-        #stadoActual = next(coleccion,estadoActual)[2]
         while validez(estadoActual[1:2])
             push!(válidos, estadoActual)
             estadoActual = next(coleccion,estadoActual)[2]
@@ -219,7 +216,7 @@ module YO
     end
 
     function alborotador(tabla::tablón)
-        todos = []
+        todos = Int64[]
         for i in 1:length(tabla.b)
             push!(todos, tabla.a[i],tabla.b[i])
         end
@@ -248,26 +245,24 @@ module YO
     end
 
     function aplicarTabla(nuez::avellana,tabla)
-#	if typeof(tabla) != tablón
-#	  return nothing
-#	end
-	if typeof(tabla) == tablón
-        a = trail(nuez,tabla)
-        a = flat(a)
-	a = anti(a, tabla)
-        a = flat(a)
-        a = map(superkron,a)
-        return sum(a)
-	end
+#if typeof(tabla) != tablón
+#  return nothing
+#end
+        if typeof(tabla) == tablón
+            #println("tipo del arg. ", typeof(trail(nuez,tabla)))
+            a = flat(trail(nuez,tabla))
+            a = anti(a, tabla)
+            a = flat(a)
+            a = map(superkron,a)
+            return sum(a)
+        end
     end
-	function anti(lista, tabla::tablón)
-		estados =[]
-		valores = alborotador(tabla)
-		a = lista
-		for i in 1:2:length(valores)
-			a = map(x->recibeAvellanaAnti(x,valores[i],valores[i+1]), a)
-			a=flat(a)
-		end
-		a
-	end
+    function anti(lista, tabla::tablón)
+        valores = alborotador(tabla)
+        a = lista
+        for i in 1:2:length(valores)
+            a = flat(map(x->recibeAvellanaAnti(x,valores[i],valores[i+1]), a))
+        end
+        a
+    end
 end
