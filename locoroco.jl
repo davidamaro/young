@@ -7,7 +7,7 @@ module YO
 
     export crater, razzamatazz, formato, antiSemita, x, y, avellana
     export determinarSigno, recibeAvellanaAnti, recibeAvellanaSim
-    export generador, generadorSim, flat, superkron
+    export generador, generadorSim, superkron
     export tablón, primero, validez, iterador2, orden2
     export orden, loca, stephen, generarTablas
     export alborotador, anti, trail, aplicarTabla, flatAvellana
@@ -16,13 +16,13 @@ module YO
     y = [0,1]
 
     type avellana
-        coef :: Array{Array{Int,1},1}
+        coef :: Array{Array{Int64,1},1}
         sign :: Int64
     end
 
     type tablón
-        a :: Array{Int,1}
-        b :: Array{Int,1}
+        a :: Array{Int64,1}
+        b :: Array{Int64,1}
     end
 
     doc"""
@@ -43,7 +43,7 @@ module YO
     a los elementos que corresponden a los índices que les dimos.
     """
     function razzamatazz(lista,indices)
-        estados = Array{Int,1}[]
+        estados = Array{Int64,1}[]
         paraSerPermutados = Array{Int64,1}[]
         # paraSerPermutados = Array{}(length(indices))
         for i in 1:length(indices)
@@ -73,7 +73,6 @@ module YO
     [1,2,3,4,5] y -[3,2,1,4,5]
     """
     function antiSemita(arriba,abajo,lista)
-        sec = []
         liss = copy(lista)
         temp = lista[arriba]
         lista[arriba] = lista[abajo]
@@ -98,7 +97,6 @@ module YO
     end
 
     function generador(signos,listas)
-        #println("generador: ", typeof([avellana(listas[1],signos[1]),avellana(listas[2],signos[2])]))
         [avellana(listas[1],signos[1]),avellana(listas[2],signos[2])]
     end
 
@@ -111,17 +109,7 @@ module YO
     end
 
     function flatAvellana(A)
-       #println(typeof(A))
        result = avellana[]
-       grep(a) = for x in a 
-                   isa(x,Array) ? grep(x) : push!(result,x)
-                 end
-       grep(A)
-       result
-     end
-    function flat(A)
-       #println("flatsolo. ",typeof(A))
-       result = []
        grep(a) = for x in a 
                    isa(x,Array) ? grep(x) : push!(result,x)
                  end
@@ -136,7 +124,7 @@ module YO
     function primero(lista)
         quita = tablón[]
         push!(quita,tablón(lista,Int64[]))
-        for i in convert(Int,ceil(length(lista)/2))+1:length(lista)
+        for i in convert(Int64,ceil(length(lista)/2))+1:length(lista)
             push!(quita,tablón(lista[1:i-1],lista[i:length(lista)]))
         end
         quita
@@ -218,20 +206,20 @@ module YO
         if orden(tabla.a) && orden(tabla.b) && loca(tabla.a,tabla.b)
             return tabla
         end
-        ()
+        nothing
     end
     function generarTablas(numero)
     	contenedor = tablón[]
 	b = iterador2(permutations(1:numero))
 	for i in b
-		#println("tipo ", typeof(orden2(i)))
 		if typeof(orden2(i)) == Array{YO.tablón,1}
 			push!(contenedor, orden2(i)...)
 			continue
 		end
-		push!(contenedor, orden2(i))
+		if stephen(orden2(i)) != nothing
+			push!(contenedor, orden2(i))
+		end
 	end
-	#println("tipo cont ", typeof(contenedor))
 	contenedor
     end
 
@@ -243,18 +231,6 @@ module YO
         todos
     end
 
-    #function anti(nuez::avellana,tabla::tablón)
-        #if length(tabla.b) == 0
-            #return nuez
-        #end
-        #valores = alborotador(tabla)
-        #demas = []
-        #for i in 1:2:length(valores-1)
-            #push!(demas,recibeAvellanaAnti(nuez,valores[i],valores[i+1]))
-        #end
-        #demas
-    #end
-
     function trail(nuez::avellana, tabla::tablón)
         sal = recibeAvellanaSim(nuez,tabla.a)
         if length(tabla.b) == 0
@@ -265,16 +241,10 @@ module YO
     end
 
     function aplicarTabla(nuez::avellana,tabla)
-#if typeof(tabla) != tablón
-#  return nothing
-#end
         if typeof(tabla) == tablón
             a = flatAvellana(trail(nuez,tabla))
-	    #println("PREanti: ", typeof(a))
             a = anti(a, tabla)
-	    #println("anti: ", typeof(a))
             a = flatAvellana(a)
-	    #println("POSTanti: ", typeof(a))
             a = map(superkron,a)
             return sum(a)
         end
@@ -283,10 +253,8 @@ module YO
         valores = alborotador(tabla)
         a = lista
         for i in 1:2:length(valores)
-	    #println("por aquí pasó:")
             a = flatAvellana(map(x->recibeAvellanaAnti(x,valores[i],valores[i+1]), a))
         end
-	    #println("dentroDEanti: ", typeof(a))
         a
     end
 end
