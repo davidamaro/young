@@ -11,6 +11,7 @@ module YO
     export tablón, primero, validez, iterador2, orden2
     export orden, loca, stephen, generarTablas
     export alborotador, anti, trail, aplicarTabla, flatAvellana
+    export detNumCar, estado
 
     x = [1,0]
     y = [0,1]
@@ -257,4 +258,34 @@ module YO
         end
         a
     end
+    doc"""
+    El tres es porque ese es el número de carácteres para [x,.
+    El dos es porque se tiene que saltar las comas y el menos uno es
+    para no pasarse.
+    """
+	function detNumCar(qbits)
+		3 + 2*(qbits-1)
+	end
+	function estado(qbits, qbitsarriba)
+		total = detNumCar(qbits)
+		ys = detNumCar(qbitsarriba)
+		lista = "["
+		for i in 2:total
+			# si ya terminó
+			if isodd(i) && i == total
+				lista = string(lista,"]")
+				continue
+			# si es impar va un punto
+			elseif isodd(i)
+				lista = string(lista,",")
+				continue
+			# si todavía quedan ys
+			elseif i <= ys
+				lista = string(lista, "y")
+			else
+				lista = string(lista, "x")
+			end
+		end
+		lista
+	end
 end
