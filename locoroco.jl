@@ -286,6 +286,6 @@ module YO
 				lista = string(lista, "x")
 			end
 		end
-		lista
+		eval(parse(string("Array",lista)))
 	end
 end
