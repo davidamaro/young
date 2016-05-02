@@ -8,7 +8,7 @@ module YO
     export crater, razzamatazz, formato, antiSemita, x, y, avellana
     export determinarSigno, recibeAvellanaAnti, recibeAvellanaSim
     export generador, generadorSim, superkron
-    export tablón, primero, validez, iterador2, orden2
+    export tablón, primero, esvalida, iterador, ordenados
     export orden, loca, stephen, generarTablas
     export alborotador, anti, trail, aplicarTabla, flatAvellana
     export detNumCar, estado
@@ -131,23 +131,23 @@ module YO
         quita
     end
 
-    function validez(lista)
+    function esvalida(lista)
         if (lista[1] == 1 && lista[2] == 2) || (lista[1] == 1 && lista[2] == 3)
             return true
         end
         return false
     end
-    function iterador2(coleccion)
+    function iterador(coleccion)
         válidos = Array{Int64,1}[]
         estadoActual = start(coleccion)
-        while validez(estadoActual[1:2])
+        while esvalida(estadoActual[1:2])
             push!(válidos, estadoActual)
             estadoActual = next(coleccion,estadoActual)[2]
         end
         válidos
     end
 
-    function orden2(lista)
+    function ordenados(lista)
         longMin = 1
         if length(lista) == longMin
             return Array[lista]
@@ -211,14 +211,14 @@ module YO
     end
     function generarTablas(numero)
     	contenedor = tablón[]
-	b = iterador2(permutations(1:numero))
+	b = iterador(permutations(1:numero))
 	for i in b
-		if typeof(orden2(i)) == Array{YO.tablón,1}
-			push!(contenedor, orden2(i)...)
+		if typeof(ordenados(i)) == Array{YO.tablón,1}
+			push!(contenedor, ordenados(i)...)
 			continue
 		end
-		if stephen(orden2(i)) != nothing
-			push!(contenedor, orden2(i))
+		if stephen(ordenados(i)) != nothing
+			push!(contenedor, ordenados(i))
 		end
 	end
 	contenedor
