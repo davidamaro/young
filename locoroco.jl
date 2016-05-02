@@ -11,7 +11,7 @@ module YO
     export tablón, primero, esvalida, iterador, ordenados
     export orden, loca, stephen, generarTablas
     export alborotador, anti, trail, aplicarTabla, flatAvellana
-    export detNumCar, estado
+    export detNumCar, estado, flatVecs
 
     x = [1,0]
     y = [0,1]
@@ -108,6 +108,15 @@ module YO
         end
         estados
     end
+
+    function flatVecs(A)
+       result =  Float64[]
+       grep(a) = for x in a 
+                   isa(x,Array) ? grep(x) : push!(result,x)
+                 end
+       grep(A)
+       result
+     end
 
     function flatAvellana(A)
        result = avellana[]
