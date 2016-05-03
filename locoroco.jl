@@ -5,12 +5,12 @@ __precompile__(true)
 
 module YO
 
-    export crater, razzamatazz, formato, antiSemita, x, y, avellana
-    export determinarSigno, recibeAvellanaAnti, recibeAvellanaSim
-    export generador, generadorSim, superkron
-    export tablón, primero, esvalida, iterador, ordenados
+    export pasoSimetrizar, simetrizar, formato, antisimetrizar, x, y, avellana
+    export parejaAntisimétrica, AvellanaAntisimétrica, AvellanaSimétrica
+    export paqueteAntisimétrico, paqueteSimétrico, kronAvellana
+    export tablón, primero, esválida, iterador, ordenados
     export orden, loca, stephen, generarTablas
-    export alborotador, anti, trail, aplicarTabla, flatAvellana
+    export alborotador, antisimetrizador, simetrizador, aplicarTabla, aplanarAvellana
     export detNumCar, estado, flatVecs
 
     x = [1,0]
@@ -30,7 +30,7 @@ module YO
     `lista` es el **vector** a *modificar*. `permutación`
     es el **vector** *permutador*.
     """
-    function crater(lista,permutacion,indices)
+    function pasoSimetrizar(lista,permutacion,indices)
         for i in eachindex(indices)
 	    lista[indices[i]] = permutacion[i]
         end
@@ -43,7 +43,7 @@ module YO
     con el número de índices y se aplican las permutaciones
     a los elementos que corresponden a los índices que les dimos.
     """
-    function razzamatazz(lista,indices)
+    function simetrizar(lista,indices)
         estados = Array{Int64,1}[]
         paraSerPermutados = Array{Int64,1}[]
         # paraSerPermutados = Array{}(length(indices))
@@ -52,7 +52,7 @@ module YO
         end
         permutaciones = collect(permutations(paraSerPermutados))
         for i in 1:length(permutaciones)
-            push!(estados, crater(lista,permutaciones[i],indices)...)
+            push!(estados, pasoSimetrizar(lista,permutaciones[i],indices)...)
         end
         estados
         formato(reshape(estados, (length(lista), div(length(estados), length(lista)))))
@@ -73,7 +73,7 @@ module YO
     antisemita(1,3,lista) nos devuelve
     [1,2,3,4,5] y -[3,2,1,4,5]
     """
-    function antiSemita(arriba,abajo,lista)
+    function antisimetrizar(arriba,abajo,lista)
         liss = copy(lista)
         temp = lista[arriba]
         lista[arriba] = lista[abajo]
@@ -82,26 +82,26 @@ module YO
         formato(reshape(juntador, (length(lista), div(length(juntador), length(lista)))))
     end
 
-    function determinarSigno(signo)
+    function parejaAntisimétrica(signo)
         signo,-signo
     end
 
-    function recibeAvellanaAnti(avellana,arriba,abajo)
-        signos = determinarSigno(avellana.sign)
-        listas = antiSemita(arriba,abajo,avellana.coef)
-        generador(signos,listas)
+    function AvellanaAntisimétrica(avellana,arriba,abajo)
+        signos = parejaAntisimétrica(avellana.sign)
+        listas = antisimetrizar(arriba,abajo,avellana.coef)
+        paqueteAntisimétrico(signos,listas)
     end
 
-    function recibeAvellanaSim(avellana,indices)
-        listas = razzamatazz(avellana.coef,indices)
-        generadorSim(listas)
+    function AvellanaSimétrica(avellana,indices)
+        listas = simetrizar(avellana.coef,indices)
+        paqueteSimétrico(listas)
     end
 
-    function generador(signos,listas)
+    function paqueteAntisimétrico(signos,listas)
         [avellana(listas[1],signos[1]),avellana(listas[2],signos[2])]
     end
 
-    function generadorSim(listas)
+    function paqueteSimétrico(listas)
         estados = avellana[]
         for i in 1:length(listas)
             push!(estados,avellana(listas[i],+1))
@@ -118,7 +118,7 @@ module YO
        result
      end
 
-    function flatAvellana(A)
+    function aplanarAvellana(A)
        result = avellana[]
        grep(a) = for x in a 
                    isa(x,Array) ? grep(x) : push!(result,x)
@@ -127,7 +127,7 @@ module YO
        result
      end
 
-    function superkron(avellana)
+    function kronAvellana(avellana)
         avellana.sign*kron(avellana.coef...)
     end
 
@@ -140,7 +140,7 @@ module YO
         quita
     end
 
-    function esvalida(lista)
+    function esválida(lista)
         if (lista[1] == 1 && lista[2] == 2) || (lista[1] == 1 && lista[2] == 3)
             return true
         end
@@ -149,7 +149,7 @@ module YO
     function iterador(coleccion)
         válidos = Array{Int64,1}[]
         estadoActual = start(coleccion)
-        while esvalida(estadoActual[1:2])
+        while esválida(estadoActual[1:2])
             push!(válidos, estadoActual)
             estadoActual = next(coleccion,estadoActual)[2]
         end
@@ -241,29 +241,29 @@ module YO
         todos
     end
 
-    function trail(nuez::avellana, tabla::tablón)
-        sal = recibeAvellanaSim(nuez,tabla.a)
+    function simetrizador(nuez::avellana, tabla::tablón)
+        sal = AvellanaSimétrica(nuez,tabla.a)
         if length(tabla.b) == 0
             return sal
         end
-        sal = map(x->recibeAvellanaSim(x,tabla.b),sal)
+        sal = map(x->AvellanaSimétrica(x,tabla.b),sal)
         sal
     end
 
     function aplicarTabla(nuez::avellana,tabla)
         if typeof(tabla) == tablón
-            a = flatAvellana(trail(nuez,tabla))
-            a = anti(a, tabla)
-            a = flatAvellana(a)
-            a = map(superkron,a)
+            a = aplanarAvellana(simetrizador(nuez,tabla))
+            a = antisimetrizador(a, tabla)
+            a = aplanarAvellana(a)
+            a = map(kronAvellana,a)
             return sum(a)
         end
     end
-    function anti(lista, tabla::tablón)
+    function antisimetrizador(lista, tabla::tablón)
         valores = alborotador(tabla)
         a = lista
         for i in 1:2:length(valores)
-            a = flatAvellana(map(x->recibeAvellanaAnti(x,valores[i],valores[i+1]), a))
+            a = aplanarAvellana(map(x->AvellanaAntisimétrica(x,valores[i],valores[i+1]), a))
         end
         a
     end
