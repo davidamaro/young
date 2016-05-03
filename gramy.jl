@@ -1,4 +1,4 @@
-include("locoroco.jl")
+include("young.jl")
 include("gramschmidt.jl")
 using YO
 using GM
@@ -25,7 +25,7 @@ push!(todos, otros)
 vecs = Array{Float64,1}[]
 end
 #@show todos
-tontita = flatVecs(todos)
+tontita = aplanarVectores(todos)
 #dim
 n = 2^dim
 esto = reshape(tontita,(n,div(length(tontita), n)))

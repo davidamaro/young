@@ -1,4 +1,4 @@
-# Aqui viene una explicación de lo que se hace en el módulo, los autores y la fecha
+# David Amaro-Alcalá
 
 # La siguiente instrucción sirve para *precompilar* el módulo
 __precompile__(true)
@@ -11,7 +11,7 @@ module YO
     export tablón, primero, esválida, iterador, ordenados
     export orden, loca, stephen, generarTablas
     export alborotador, antisimetrizador, simetrizador, aplicarTabla, aplanarAvellana
-    export detNumCar, estado, flatVecs
+    export determinarCadena, estado, aplanarVectores
 
     x = [1,0]
     y = [0,1]
@@ -109,7 +109,7 @@ module YO
         estados
     end
 
-    function flatVecs(A)
+    function aplanarVectores(A)
        result =  Float64[]
        grep(a) = for x in a 
                    isa(x,Array) ? grep(x) : push!(result,x)
@@ -272,12 +272,12 @@ module YO
     El dos es porque se tiene que saltar las comas y el menos uno es
     para no pasarse.
     """
-	function detNumCar(qbits)
+	function determinarCadena(qbits)
 		3 + 2*(qbits-1)
 	end
 	function estado(qbits, qbitsarriba)
-		total = detNumCar(qbits)
-		ys = detNumCar(qbitsarriba)
+		total = determinarCadena(qbits)
+		ys = determinarCadena(qbitsarriba)
 		lista = "["
 		for i in 2:total
 			# si ya terminó
